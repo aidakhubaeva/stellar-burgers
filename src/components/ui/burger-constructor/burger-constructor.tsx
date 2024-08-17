@@ -16,7 +16,9 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   price,
   orderModalData,
   onOrderClick,
-  closeOrderModal
+  closeOrderModal,
+  handleRemove,
+  handleMove
 }) => (
   <section className={styles.burger_constructor}>
     {constructorItems.bun ? (
@@ -44,7 +46,12 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
               ingredient={item}
               index={index}
               totalItems={constructorItems.ingredients.length}
-              key={item.id}
+              key={item.uniqueId!}
+              handleRemove={handleRemove}
+              handleMoveUp={() => handleMove(index, index - 1)}
+              handleMoveDown={() => handleMove(index, index + 1)}
+              handleClose={() => handleRemove(item.uniqueId!)}
+              onMove={handleMove}
             />
           )
         )

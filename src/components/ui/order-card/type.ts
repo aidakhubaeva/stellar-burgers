@@ -5,6 +5,9 @@ export type OrderCardUIProps = {
   orderInfo: TOrderInfo;
   maxIngredients: number;
   locationState: { background: Location };
+  onClick: () => void;
+  className?: string;
+  isNew: boolean;
 };
 
 type TOrderInfo = {

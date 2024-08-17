@@ -1,37 +1,45 @@
 .header {
   background-color: var(--background);
 }
+
 .menu {
   display: flex;
   align-items: center;
   max-width: 1240px;
   height: 56px;
   margin: 0 auto;
+  justify-content: space-between;
 }
 
 .menu_part_left {
   display: flex;
-  flex-basis: 35%;
+  align-items: center;
 }
 
 .link {
   display: flex;
+  align-items: center;
   text-decoration: none;
   color: var(--text-inactive-color);
+  cursor: pointer;
+  margin-right: 10px;
 }
 
 .link_active {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
   color: var(--text-primary-color);
+  cursor: pointer;
+  margin-right: 10px;
 }
 
 .link_position_last {
   display: flex;
-  justify-content: flex-end;
-  flex-basis: 35%;
+  align-items: center;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  margin: 0 auto;
 }

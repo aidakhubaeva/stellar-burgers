@@ -1,6 +1,5 @@
 import React, { FC, memo } from 'react';
 import { Tab } from '@zlden/react-developer-burger-ui-components';
-
 import styles from './burger-ingredients.module.css';
 import { BurgerIngredientsUIProps } from './type';
 import { IngredientsCategory } from '@components';
@@ -18,8 +17,22 @@ export const BurgerIngredientsUI: FC<BurgerIngredientsUIProps> = memo(
     mainsRef,
     saucesRef,
     onTabClick
-  }) => (
-    <>
+  }) => {
+    console.log('BurgerIngredientsUI Props:', {
+      currentTab,
+      buns,
+      mains,
+      sauces,
+      titleBunRef,
+      titleMainRef,
+      titleSaucesRef,
+      bunsRef,
+      mainsRef,
+      saucesRef,
+      onTabClick
+    });
+
+    return (
       <section className={styles.burger_ingredients}>
         <nav>
           <ul className={styles.menu}>
@@ -63,6 +76,6 @@ export const BurgerIngredientsUI: FC<BurgerIngredientsUIProps> = memo(
           />
         </div>
       </section>
-    </>
-  )
+    );
+  }
 );

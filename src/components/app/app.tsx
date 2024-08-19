@@ -27,7 +27,6 @@ import {
   closeModal,
   fetchBurgerData,
   fetchCurrentUser,
-  fetchUserOrders,
   selectIsAuthenticated,
   selectUser
 } from '../../slices/burgerSlice';
@@ -47,10 +46,8 @@ const App: React.FC = () => {
       .catch((error) => {
         console.error('Ошибка загрузки ингредиентов:', error);
       });
-
     if (isAuthenticated) {
       dispatch(fetchCurrentUser());
-      dispatch(fetchUserOrders());
     }
   }, [dispatch, isAuthenticated]);
 
@@ -59,12 +56,6 @@ const App: React.FC = () => {
       dispatch(fetchCurrentUser());
     }
   }, [dispatch, isAuthenticated, user]);
-
-  useEffect(() => {
-    if (user) {
-      dispatch(fetchUserOrders());
-    }
-  }, [dispatch, user]);
 
   const handleModalClose = () => {
     if (backgroundLocation) {

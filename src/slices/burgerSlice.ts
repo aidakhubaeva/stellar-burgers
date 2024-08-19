@@ -43,6 +43,8 @@ interface BurgerState {
   ingredients: TIngredient[];
   userOrders: TOrder[];
   orders: TOrder[];
+  totalOrdersCount: number | null;
+  totalOrdersTodayCount: number | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   orderModalData: TOrder | null;
   currentIngredient: TIngredient | null;
@@ -68,6 +70,8 @@ const initialState: BurgerState = {
   ingredients: [],
   userOrders: [],
   orders: [],
+  totalOrdersCount: null,
+  totalOrdersTodayCount: null,
   status: 'idle',
   orderModalData: null,
   currentIngredient: null,
@@ -91,59 +95,51 @@ const initialState: BurgerState = {
 
 // Асинхронные экшены
 
-// Получение всех заказов
-export const fetchOrders = createAsyncThunk<
-  TOrder[],
+// Получение общего количества заказов и количества заказов за сегодня
+export const fetchTotalOrdersCount = createAsyncThunk<
+  { total: number; totalToday: number },
   void,
   { rejectValue: string }
->('burger/fetchOrders', async (_, { rejectWithValue }) => {
-  try {
-    const response = await getFeedsApi();
-    return response.orders;
-  } catch (err) {
-    return rejectWithValue('Не удалось получить заказы');
-  }
+>('burger/fetchTotalOrdersCount', async () => {
+  const response = await getFeedsApi(); // API должен поддерживать метод получения общего количества заказов
+  return {
+    total: response.total, // Общее количество заказов
+    totalToday: response.totalToday // Количество заказов за сегодня
+  };
+});
+
+// Получение всех заказов с поддержкой пагинации
+export const fetchOrders = createAsyncThunk<
+  TOrder[],
+  { offset: number; limit: number },
+  { rejectValue: string }
+>('burger/fetchOrders', async ({ offset, limit }) => {
+  const response = await getFeedsApi(offset, limit); // API должно поддерживать такие параметры
+  return response.orders;
 });
 
 // Получение данных о ингредиентах для конструктора
 export const fetchBurgerData = createAsyncThunk(
   'burger/fetchBurgerData',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await getIngredientsApi();
-      if (!response) {
-        throw new Error('Ошибка: данные от сервера не получены');
-      }
-      return response;
-    } catch (err) {
-      return rejectWithValue(
-        'Не удалось получить данные об ингредиентах. Пожалуйста, попробуйте позже.'
-      );
-    }
+  async () => {
+    const response = await getIngredientsApi();
+    return response;
   }
 );
 
 // Создание заказа с проверкой токена
 export const createOrder = createAsyncThunk<OrderResponse, string[]>(
   'burger/createOrder',
-  async (ingredientIds, { rejectWithValue, dispatch, getState }) => {
-    try {
-      const response = await orderBurgerApi(ingredientIds);
-      if (!response || !response.order) {
-        throw new Error('Ошибка: некорректный ответ от сервера');
-      }
+  async (ingredientIds, { dispatch, getState }) => {
+    const response = await orderBurgerApi(ingredientIds);
+    const state = getState() as { burger: BurgerState };
+    const user = state.burger.user;
 
-      const state = getState() as { burger: BurgerState };
-      const user = state.burger.user;
-
-      if (user) {
-        response.order.user = user.email;
-      }
-      dispatch(setNewOrderId(response.order._id));
-      return response;
-    } catch (err) {
-      return rejectWithValue('Failed to place order. Please try again later.');
+    if (user) {
+      response.order.user = user.email;
     }
+    dispatch(setNewOrderId(response.order._id));
+    return response;
   }
 );
 
@@ -151,47 +147,31 @@ export const fetchUserOrders = createAsyncThunk<
   TOrder[],
   void,
   { rejectValue: string }
->('burger/fetchUserOrders', async (_, { rejectWithValue }) => {
-  try {
-    const response = await getOrdersApi();
-    return response;
-  } catch (err) {
-    return rejectWithValue('Не удалось получить заказы пользователя');
-  }
+>('burger/fetchUserOrders', async () => {
+  const response = await getOrdersApi();
+  return response;
 });
 
 export const fetchCurrentUser = createAsyncThunk<
   TUser,
   void,
   { rejectValue: string }
->('auth/fetchCurrentUser', async (_, { rejectWithValue, dispatch }) => {
-  try {
-    const response = await getUserApi();
-    if (response && response.success) {
-      dispatch(setUser(response.user));
-      return response.user;
-    } else {
-      return rejectWithValue('Failed to fetch user');
-    }
-  } catch (err) {
-    return rejectWithValue('Failed to fetch user');
-  }
+>('auth/fetchCurrentUser', async (_, { dispatch }) => {
+  const response = await getUserApi();
+  dispatch(setUser(response.user));
+  return response.user;
 });
 
 // Логин пользователя
 export const fetchLoginUser = createAsyncThunk<LoginResponse, TLoginData>(
   'burger/login',
   async (data, { dispatch }) => {
-    try {
-      const response: LoginResponse = await loginUserApi(data);
-      setCookie('accessToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      dispatch(setToken(response.accessToken));
-      dispatch(setUser(response.user));
-      return response;
-    } catch (err) {
-      throw err;
-    }
+    const response: LoginResponse = await loginUserApi(data);
+    setCookie('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    dispatch(setToken(response.accessToken));
+    dispatch(setUser(response.user));
+    return response;
   }
 );
 
@@ -200,12 +180,8 @@ export const fetchRegisterUser = createAsyncThunk<
   RegisterResponse,
   TRegisterData
 >('burger/register', async (data) => {
-  try {
-    const response: RegisterResponse = await registerUserApi(data);
-    return response;
-  } catch (err) {
-    throw err;
-  }
+  const response: RegisterResponse = await registerUserApi(data);
+  return response;
 });
 
 // Выход пользователя (Logout)
@@ -228,28 +204,9 @@ export const updateUser = createAsyncThunk<
   TUser,
   TUser,
   { rejectValue: string }
->('auth/updateUser', async (userData, { rejectWithValue }) => {
-  try {
-    console.log('Начало обновления пользователя с данными:', userData);
-    const response = await updateUserApi(userData);
-    if (!response || !response.user) {
-      console.error(
-        'Некорректный ответ от сервера при обновлении пользователя:',
-        response
-      );
-      return rejectWithValue(
-        'Не удалось обновить пользователя: некорректный ответ от сервера.'
-      );
-    }
-
-    console.log('Пользователь успешно обновлен:', response.user);
-    return response.user;
-  } catch (err) {
-    console.error('Ошибка при обновлении пользователя:', err);
-    return rejectWithValue(
-      'Не удалось обновить пользователя: произошла ошибка.'
-    );
-  }
+>('auth/updateUser', async (userData) => {
+  const response = await updateUserApi(userData);
+  return response.user;
 });
 
 // Создание слайса
@@ -359,6 +316,10 @@ const burgerSlice = createSlice({
           state.orders = action.payload;
         }
       )
+      .addCase(fetchTotalOrdersCount.fulfilled, (state, action) => {
+        state.totalOrdersCount = action.payload.total;
+        state.totalOrdersTodayCount = action.payload.totalToday;
+      })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.ordersStatus = 'failed';
         state.ordersError = action.payload || 'Не удалось получить заказы';
@@ -387,7 +348,8 @@ const burgerSlice = createSlice({
       })
       .addCase(fetchBurgerData.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch data';
+        state.error =
+          action.error.message || 'Не удалось получить данные об ингредиентах';
       })
       .addCase(createOrder.pending, (state) => {
         state.orderRequest = true;
@@ -403,7 +365,7 @@ const burgerSlice = createSlice({
       )
       .addCase(createOrder.rejected, (state, action) => {
         state.orderRequest = false;
-        state.error = action.error.message || 'Failed to place order';
+        state.error = action.error.message || 'Не удалось создать заказ';
       })
       .addCase(fetchLoginUser.pending, (state) => {
         state.status = 'loading';
@@ -420,7 +382,7 @@ const burgerSlice = createSlice({
       )
       .addCase(fetchLoginUser.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Failed to login';
+        state.error = action.error.message || 'Не удалось войти';
       })
       .addCase(fetchRegisterUser.pending, (state) => {
         state.status = 'loading';
@@ -437,7 +399,7 @@ const burgerSlice = createSlice({
       )
       .addCase(fetchRegisterUser.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Failed to register';
+        state.error = action.error.message || 'Не удалось зарегистрироваться';
       })
       .addCase(fetchLogoutUser.fulfilled, (state) => {
         state.isAuthenticated = false;
@@ -460,14 +422,13 @@ const burgerSlice = createSlice({
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.status = 'failed';
         state.user = null;
-        state.error = action.payload || 'Failed to fetch user';
+        state.error =
+          action.payload || 'Не удалось получить данные пользователя';
       })
       .addCase(updateUser.fulfilled, (state, action: PayloadAction<TUser>) => {
-        console.log('Пользователь успешно обновлен:', action.payload);
         state.user = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
-        console.error('Ошибка при обновлении пользователя:', action.payload);
         state.error = action.payload as string;
       });
   }
@@ -513,6 +474,10 @@ export const selectCurrentPage = (state: { burger: BurgerState }) =>
   state.burger.currentPage;
 export const selectOrders = (state: { burger: BurgerState }) =>
   state.burger.orders;
+export const selectTotalOrdersCount = (state: { burger: BurgerState }) =>
+  state.burger.totalOrdersCount;
+export const selectTotalOrdersTodayCount = (state: { burger: BurgerState }) =>
+  state.burger.totalOrdersTodayCount;
 export const selectOrdersStatus = (state: { burger: BurgerState }) =>
   state.burger.ordersStatus;
 export const selectOrdersError = (state: { burger: BurgerState }) =>

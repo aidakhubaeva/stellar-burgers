@@ -3,4 +3,5 @@ export type TAppHeaderUIProps = {
   onConstructorClick: () => void;
   onOrderFeedClick: () => void;
   onProfileClick: () => void;
+  onLogoClick: () => void;
 };

@@ -1,15 +1,12 @@
 import { FC } from 'react';
-
 import { Button, Input } from '@zlden/react-developer-burger-ui-components';
 import styles from './profile.module.css';
 import commonStyles from '../common.module.css';
-
 import { ProfileUIProps } from './type';
 import { ProfileMenu } from '@components';
 
 export const ProfileUI: FC<ProfileUIProps> = ({
   formValue,
-  isFormChanged,
   updateUserError,
   handleSubmit,
   handleCancel,
@@ -63,21 +60,20 @@ export const ProfileUI: FC<ProfileUIProps> = ({
             icon={'EditIcon'}
           />
         </div>
-        {isFormChanged && (
-          <div className={styles.button}>
-            <Button
-              type='secondary'
-              htmlType='button'
-              size='medium'
-              onClick={handleCancel}
-            >
-              Отменить
-            </Button>
-            <Button type='primary' size='medium' htmlType='submit'>
-              Сохранить
-            </Button>
-          </div>
-        )}
+        {/* Кнопки будут отображаться всегда, независимо от изменений */}
+        <div className={styles.button}>
+          <Button
+            type='secondary'
+            htmlType='button'
+            size='medium'
+            onClick={handleCancel}
+          >
+            Отменить
+          </Button>
+          <Button type='primary' size='medium' htmlType='submit'>
+            Сохранить
+          </Button>
+        </div>
         {updateUserError && (
           <p
             className={`${commonStyles.error} pt-5 text text_type_main-default`}

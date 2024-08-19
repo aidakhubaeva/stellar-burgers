@@ -1,13 +1,13 @@
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC, useEffect } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
 import {
   fetchOrders,
+  fetchTotalOrdersCount,
   selectOrders,
   selectOrdersStatus,
   selectOrdersError,
-  selectIsAuthenticated,
   setOrders,
-  setNewOrderId
+  selectTotalOrdersCount
 } from '../../slices/burgerSlice';
 import { Preloader } from '@ui';
 import { FeedUI } from '@ui-pages';
@@ -17,31 +17,21 @@ export const Feed: FC = () => {
   const orders = useSelector(selectOrders);
   const ordersStatus = useSelector(selectOrdersStatus);
   const ordersError = useSelector(selectOrdersError);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const prevOrdersRef = useRef(orders);
+  const totalOrdersCount = useSelector(selectTotalOrdersCount);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      const intervalId = setInterval(async () => {
-        const result = await dispatch(fetchOrders()).unwrap();
-        const newOrders = result.filter(
-          (order) =>
-            !prevOrdersRef.current.some(
-              (prevOrder) => prevOrder._id === order._id
-            )
-        );
-        if (newOrders.length > 0) {
-          dispatch(setOrders(result));
-          newOrders.forEach((order) => dispatch(setNewOrderId(order._id)));
-        }
-        prevOrdersRef.current = result;
-      }, 1000);
+    const loadFeedData = async () => {
+      await dispatch(fetchTotalOrdersCount());
+      const result = await dispatch(
+        fetchOrders({ offset: 0, limit: 40 })
+      ).unwrap();
+      dispatch(setOrders(result));
+    };
 
-      return () => clearInterval(intervalId);
-    }
-  }, [dispatch, isAuthenticated]);
+    loadFeedData();
+  }, [dispatch]);
 
-  if (ordersStatus === 'loading' && !prevOrdersRef.current.length) {
+  if (ordersStatus === 'loading' && !orders.length) {
     return <Preloader />;
   }
 
@@ -52,8 +42,9 @@ export const Feed: FC = () => {
   return (
     <FeedUI
       orders={orders}
+      totalOrdersCount={totalOrdersCount}
       handleGetFeeds={() => {
-        dispatch(fetchOrders());
+        dispatch(fetchOrders({ offset: 0, limit: 40 }));
       }}
     />
   );

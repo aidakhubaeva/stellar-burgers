@@ -12,11 +12,11 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({
   userName,
   onConstructorClick,
   onOrderFeedClick,
-  onProfileClick
+  onProfileClick,
+  onLogoClick
 }) => {
-  const getLinkClass = (path: string) => {
-    return window.location.pathname === path ? styles.link_active : styles.link;
-  };
+  const getLinkClass = (path: string) =>
+    window.location.pathname === path ? styles.link_active : styles.link;
 
   return (
     <header className={styles.header}>
@@ -37,7 +37,7 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({
             <p className='text text_type_main-default ml-2'>Лента заказов</p>
           </div>
         </div>
-        <div className={styles.logo}>
+        <div className={styles.logo} onClick={onLogoClick}>
           <Logo className='' />
         </div>
         <div className={getLinkClass('/profile')} onClick={onProfileClick}>

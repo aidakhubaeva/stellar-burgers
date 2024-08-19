@@ -1,5 +1,4 @@
 import React, { FC, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { BurgerConstructorUI } from '@ui';
 import {
@@ -16,10 +15,10 @@ import {
   selectBurgerStatus,
   selectBurgerIngredients
 } from '../../slices/burgerSlice';
-import { AppDispatch } from '../../services/store';
+import { useSelector, useDispatch } from '../../services/store';
 
 export const BurgerConstructor: FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const constructorItems = useSelector(selectBurgerConstructorItems);
   const orderRequest = useSelector(selectOrderRequest);
@@ -28,17 +27,15 @@ export const BurgerConstructor: FC = () => {
   const burgerStatus = useSelector(selectBurgerStatus);
   const ingredients = useSelector(selectBurgerIngredients);
 
-  // Проверка статуса загрузки
   if (burgerStatus !== 'succeeded') {
-    return null; // Можно заменить на компонент загрузки или просто вернуть null до загрузки
+    return null;
   }
 
-  const onOrderClick = () => {
+  const onOrderClick = async () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-
     if (!constructorItems.bun) {
       console.error('Нет булочки для заказа');
       return;
@@ -52,25 +49,18 @@ export const BurgerConstructor: FC = () => {
       constructorItems.bun._id
     ];
 
-    dispatch(createOrder(ingredientIds))
-      .then((response: any) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          const orderId = response.payload.order._id;
-          const userOrders = JSON.parse(
-            localStorage.getItem('userOrders') || '[]'
-          );
-          userOrders.push(orderId);
-          localStorage.setItem('userOrders', JSON.stringify(userOrders));
+    try {
+      const response = await dispatch(createOrder(ingredientIds)).unwrap();
+      const orderId = response.order._id;
+      const userOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
+      userOrders.push(orderId);
+      localStorage.setItem('userOrders', JSON.stringify(userOrders));
 
-          dispatch(setOrderModalData(response.payload.order));
-          dispatch(openModal());
-        } else {
-          console.error('Создание заказа не удалось:', response);
-        }
-      })
-      .catch((error: any) => {
-        console.error('Ошибка создания заказа:', error);
-      });
+      dispatch(setOrderModalData(response.order));
+      dispatch(openModal());
+    } catch (error) {
+      console.error('Ошибка создания заказа:', error);
+    }
   };
 
   const closeOrderModal = () => {
@@ -97,22 +87,34 @@ export const BurgerConstructor: FC = () => {
     return bunPrice + ingredientsPrice;
   }, [constructorItems]);
 
-  const expandedIngredients = useMemo(() => {
-    return constructorItems.ingredients.flatMap(({ item, count }) => {
-      const fullIngredientData = ingredients.find(
-        (ing) => ing._id === item._id
-      );
+  const expandedIngredients = useMemo(
+    () =>
+      constructorItems.ingredients
+        .map(({ item, count }) => {
+          if (!item) {
+            console.error('Item is undefined:', item);
+            return [];
+          }
 
-      return fullIngredientData
-        ? Array(count)
+          const fullIngredientData = ingredients.find(
+            (ing) => ing._id === item._id
+          );
+
+          if (!fullIngredientData) {
+            console.error('Ingredient not found:', item._id);
+            return [];
+          }
+
+          return Array(count)
             .fill(null)
             .map((_, index) => ({
               ...fullIngredientData,
               uniqueId: `${item._id}-${index}`
-            }))
-        : [];
-    });
-  }, [constructorItems.ingredients, ingredients]);
+            }));
+        })
+        .flat(),
+    [constructorItems.ingredients, ingredients]
+  );
 
   return (
     <BurgerConstructorUI

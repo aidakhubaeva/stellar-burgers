@@ -1,5 +1,4 @@
 import { FC, memo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { BurgerIngredientUI } from '@ui';
 import { TBurgerIngredientProps } from './type';
@@ -10,6 +9,7 @@ import {
   setCurrentIngredient
 } from '../../slices/burgerSlice';
 import { TConstructorIngredient } from '@utils-types';
+import { useSelector, useDispatch } from '../../services/store';
 
 export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
   ({ ingredient }) => {

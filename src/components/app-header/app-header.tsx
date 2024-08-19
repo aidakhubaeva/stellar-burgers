@@ -1,29 +1,28 @@
 import { FC } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setCurrentPage } from '../../slices/burgerSlice';
 import { AppHeaderUI } from '@ui';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 
 export const AppHeader: FC = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { goToPage } = useAppNavigation();
 
   const handleConstructorClick = () => {
     console.log('Переход на страницу конструктора');
-    dispatch(setCurrentPage('constructor'));
-    navigate('/');
+    goToPage('constructor', '/');
   };
 
   const handleOrderFeedClick = () => {
     console.log('Переход на страницу ленты заказов');
-    dispatch(setCurrentPage('feed'));
-    navigate('/feed');
+    goToPage('feed', '/feed');
   };
 
   const handleProfileClick = () => {
     console.log('Переход на страницу профиля');
-    dispatch(setCurrentPage('profile'));
-    navigate('/profile');
+    goToPage('profile', '/profile');
+  };
+
+  const handleLogoClick = () => {
+    console.log('Переход на главную страницу');
+    goToPage('constructor', '/');
   };
 
   return (
@@ -32,6 +31,7 @@ export const AppHeader: FC = () => {
       onConstructorClick={handleConstructorClick}
       onOrderFeedClick={handleOrderFeedClick}
       onProfileClick={handleProfileClick}
+      onLogoClick={handleLogoClick}
     />
   );
 };

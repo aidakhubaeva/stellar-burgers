@@ -1,5 +1,5 @@
 import { forwardRef, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from '../../services/store';
 import { TIngredientsCategoryProps } from './type';
 import { TIngredient } from '@utils-types';
 import { IngredientsCategoryUI } from '../ui/ingredients-category';

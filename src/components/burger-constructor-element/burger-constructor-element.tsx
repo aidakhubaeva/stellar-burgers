@@ -4,6 +4,11 @@ import { BurgerConstructorElementProps } from './type';
 
 export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = memo(
   ({ ingredient, index, totalItems, handleRemove, onMove }) => {
+    if (!ingredient || !ingredient._id) {
+      console.error('Ingredient or its _id is undefined:', ingredient);
+      return null;
+    }
+
     const handleMoveDown = () => {
       if (index < totalItems - 1) {
         onMove(index, index + 1);

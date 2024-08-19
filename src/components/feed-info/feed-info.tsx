@@ -1,25 +1,28 @@
-import { FC } from 'react';
-import { useSelector } from 'react-redux';
-import { TOrder } from '@utils-types';
+import React, { FC } from 'react';
+import { useSelector } from '../../services/store';
 import { FeedInfoUI } from '../ui/feed-info';
-import { selectOrders } from '../../slices/burgerSlice';
-
-const getOrders = (orders: TOrder[], status: string): number[] =>
-  orders
-    .filter((item) => item.status === status)
-    .map((item) => item.number)
-    .slice(0, 40);
+import {
+  selectOrders,
+  selectTotalOrdersCount,
+  selectTotalOrdersTodayCount
+} from '../../slices/burgerSlice';
 
 export const FeedInfo: FC = () => {
   const orders = useSelector(selectOrders);
-  const readyOrders = getOrders(orders, 'done');
-  const pendingOrders = getOrders(orders, 'pending');
+  const totalOrdersCount = useSelector(selectTotalOrdersCount);
+  const totalOrdersTodayCount = useSelector(selectTotalOrdersTodayCount);
+
+  const readyOrders = orders
+    .filter((order) => order.status === 'done')
+    .map((order) => order.number);
+
+  const pendingOrders = orders
+    .filter((order) => order.status === 'pending')
+    .map((order) => order.number);
 
   const feed = {
-    total: orders.length,
-    today: orders.filter(
-      (order) => new Date(order.createdAt).getDay() === new Date().getDay()
-    ).length
+    total: totalOrdersCount || 0,
+    totalToday: totalOrdersTodayCount || 0
   };
 
   return (

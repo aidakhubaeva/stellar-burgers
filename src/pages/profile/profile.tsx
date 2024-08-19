@@ -1,26 +1,36 @@
+import { FC, SyntheticEvent, useEffect } from 'react';
+import { useDispatch, useSelector } from '../../services/store';
+import { updateUser, selectUser } from '../../slices/burgerSlice';
 import { ProfileUI } from '@ui-pages';
-import { FC, SyntheticEvent, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../services/store';
-import { updateUser } from '../../slices/burgerSlice';
+import { useForm } from '../../hooks/useForm';
+
+type FormValues = {
+  name: string;
+  email: string;
+  password: string;
+};
 
 export const Profile: FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const user = useSelector((state: RootState) => state.burger.user);
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
 
-  const [formValue, setFormValue] = useState({
+  const {
+    values: formValue,
+    handleChange,
+    setValues
+  } = useForm<FormValues>({
     name: user?.name || '',
     email: user?.email || '',
     password: ''
   });
 
   useEffect(() => {
-    setFormValue((prevState) => ({
-      ...prevState,
+    setValues({
       name: user?.name || '',
-      email: user?.email || ''
-    }));
-  }, [user]);
+      email: user?.email || '',
+      password: ''
+    });
+  }, [user, setValues]);
 
   const isFormChanged =
     formValue.name !== user?.name ||
@@ -29,31 +39,22 @@ export const Profile: FC = () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    console.log('Форма отправлена с данными:', formValue);
     dispatch(
       updateUser({
         name: formValue.name,
         email: formValue.email
       })
     );
+    setValues({ ...formValue, password: '' });
   };
 
   const handleCancel = (e: SyntheticEvent) => {
     e.preventDefault();
-    setFormValue({
+    setValues({
       name: user?.name || '',
       email: user?.email || '',
       password: ''
     });
-    console.log('Отмена изменений');
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormValue((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value
-    }));
-    console.log(`Изменено значение ${e.target.name} на:`, e.target.value);
   };
 
   return (
@@ -62,7 +63,7 @@ export const Profile: FC = () => {
       isFormChanged={isFormChanged}
       handleCancel={handleCancel}
       handleSubmit={handleSubmit}
-      handleInputChange={handleInputChange}
+      handleInputChange={handleChange}
     />
   );
 };

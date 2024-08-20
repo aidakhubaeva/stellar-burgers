@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from './store';
+import { useDispatch, useSelector } from './store';
 import { fetchCurrentUser } from '../slices/burgerSlice';
 import { Preloader } from '../../src/components/ui';
 
@@ -14,13 +13,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   unAuthOnly
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.burger.isAuthenticated
-  );
-  const user = useSelector((state: RootState) => state.burger.user);
-  const token = useSelector((state: RootState) => state.burger.token);
-  const userStatus = useSelector((state: RootState) => state.burger.status);
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.burger.isAuthenticated);
+  const user = useSelector((state) => state.burger.user);
+  const token = useSelector((state) => state.burger.token);
+  const userStatus = useSelector((state) => state.burger.status);
   const location = useLocation();
 
   React.useEffect(() => {

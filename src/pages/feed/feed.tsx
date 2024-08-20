@@ -21,11 +21,15 @@ export const Feed: FC = () => {
 
   useEffect(() => {
     const loadFeedData = async () => {
-      await dispatch(fetchTotalOrdersCount());
-      const result = await dispatch(
-        fetchOrders({ offset: 0, limit: 40 })
-      ).unwrap();
-      dispatch(setOrders(result));
+      try {
+        await dispatch(fetchTotalOrdersCount());
+        const result = await dispatch(
+          fetchOrders({ offset: 0, limit: 40 })
+        ).unwrap();
+        dispatch(setOrders(result));
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+      }
     };
 
     loadFeedData();

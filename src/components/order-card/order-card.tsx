@@ -18,6 +18,7 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
   const dispatch = useDispatch();
   const ingredients = useSelector(selectBurgerIngredients);
   const newOrderId = useSelector(selectNewOrderId);
+
   const orderInfo = useMemo(() => {
     if (!ingredients.length) {
       return null;
@@ -54,6 +55,7 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
       date
     };
   }, [order, ingredients]);
+
   if (!orderInfo) return null;
 
   const handleOrderClick = () => {

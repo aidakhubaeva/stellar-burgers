@@ -1,6 +1,6 @@
 import React, { FC, memo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from '../../../services/store';
 import {
   CurrencyIcon,
   FormattedDate
@@ -74,13 +74,13 @@ export const OrderCardUI: FC<OrderCardUIProps> = memo(
                     src={ingredient.image_mobile}
                     alt={ingredient.name}
                   />
-                  {maxIngredients === index + 1 ? (
+                  {maxIngredients === index + 1 && orderInfo.remains > 0 && (
                     <span
                       className={`text text_type_digits-default ${styles.remains}`}
                     >
-                      {orderInfo.remains > 0 ? `+${orderInfo.remains}` : null}
+                      +{orderInfo.remains}
                     </span>
-                  ) : null}
+                  )}
                 </li>
               );
             })}

@@ -95,13 +95,12 @@ const initialState: BurgerState = {
 
 // Асинхронные экшены
 
-// Получение общего количества заказов и количества заказов за сегодня
 export const fetchTotalOrdersCount = createAsyncThunk<
   { total: number; totalToday: number },
   void,
   { rejectValue: string }
 >('burger/fetchTotalOrdersCount', async () => {
-  const response = await getFeedsApi(); // API должен поддерживать метод получения общего количества заказов
+  const response = await getFeedsApi();
   return {
     total: response.total, // Общее количество заказов
     totalToday: response.totalToday // Количество заказов за сегодня
@@ -114,7 +113,7 @@ export const fetchOrders = createAsyncThunk<
   { offset: number; limit: number },
   { rejectValue: string }
 >('burger/fetchOrders', async ({ offset, limit }) => {
-  const response = await getFeedsApi(offset, limit); // API должно поддерживать такие параметры
+  const response = await getFeedsApi(offset, limit);
   return response.orders;
 });
 
@@ -134,7 +133,6 @@ export const createOrder = createAsyncThunk<OrderResponse, string[]>(
     const response = await orderBurgerApi(ingredientIds);
     const state = getState() as { burger: BurgerState };
     const user = state.burger.user;
-
     if (user) {
       response.order.user = user.email;
     }

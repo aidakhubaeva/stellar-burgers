@@ -15,7 +15,7 @@ import {
   selectBurgerStatus,
   selectBurgerIngredients
 } from '../../slices/burgerSlice';
-import { useSelector, useDispatch } from '../../services/store';
+import { useSelector, useDispatch } from '../../services/store'; // Используем типизированные хуки
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();

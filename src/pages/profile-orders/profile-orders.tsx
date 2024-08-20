@@ -6,12 +6,11 @@ import {
   selectUserOrders,
   selectUserOrdersStatus
 } from '../../slices/burgerSlice';
-import { TOrder } from '@utils-types';
 import { Preloader } from '@ui';
 
 export const ProfileOrders: FC = () => {
   const dispatch = useDispatch();
-  const orders: TOrder[] = useSelector(selectUserOrders);
+  const orders = useSelector(selectUserOrders);
   const ordersStatus = useSelector(selectUserOrdersStatus);
 
   useEffect(() => {

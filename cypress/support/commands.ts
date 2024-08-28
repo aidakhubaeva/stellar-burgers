@@ -1,6 +1,40 @@
 /// <reference types="cypress" />
 
-// Импорт файла intercepts.ts, который содержит определение команды setIntercepts
+// Добавляем команду для клика по кнопке "Добавить"
+Cypress.Commands.add('clickAddButton', () => {
+    cy.get('button').contains('Добавить').click(); // Находим кнопку с текстом "Добавить" и кликаем по ней
+});
+
+// Добавляем команду для открытия модального окна ингредиента
+Cypress.Commands.add('openIngredientModal', () => {
+    cy.get('[data-cy="ingredient"]').first().click(); // Находим первый ингредиент и кликаем по нему, чтобы открыть модальное окно
+});
+
+// Добавляем команду для закрытия модального окна через иконку закрытия
+Cypress.Commands.add('closeModal', () => {
+    cy.get('[data-cy="modal-close"]').click(); // Находим иконку закрытия и кликаем по ней
+});
+
+// Добавляем команду для закрытия модального окна по клику на оверлей
+Cypress.Commands.add('closeOverlayModal', () => {
+    // Находим оверлей закрытия и кликаем по нему с использованием опции { force: true }
+    cy.get('[data-cy="modal-close-overlay"]').click({ force: true });
+});
+
+// Добавляем команду для добавления первой булки в конструктор
+Cypress.Commands.add('addFirstBun', () => {
+    cy.get('[data-cy="ingredient"][data-type="bun"]').first().within(() => {
+        cy.clickAddButton(); // Используем ранее определённую команду для клика по кнопке "Добавить"
+    });
+});
+
+// Добавляем команду для добавления первого основного ингредиента в конструктор
+Cypress.Commands.add('addFirstMainIngredient', () => {
+    cy.get('[data-cy="ingredient"][data-type="main"]').first().within(() => {
+        cy.clickAddButton(); // Используем ранее определённую команду для клика по кнопке "Добавить"
+    });
+});
+
 
 // ***********************************************
 // This example commands.ts shows you how to

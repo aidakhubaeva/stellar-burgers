@@ -39,7 +39,7 @@ interface RegisterResponse {
 }
 
 // Начальное состояние
-interface BurgerState {
+export interface BurgerState {
   ingredients: TIngredient[];
   userOrders: TOrder[];
   orders: TOrder[];

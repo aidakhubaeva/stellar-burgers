@@ -1,20 +1,28 @@
-import { FC, memo, useMemo } from 'react';
+import React, { FC, memo, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-
+import { useSelector, useDispatch } from '../../services/store';
 import { OrderCardProps } from './type';
 import { TIngredient } from '@utils-types';
 import { OrderCardUI } from '../ui/order-card';
+import {
+  selectBurgerIngredients,
+  selectNewOrderId,
+  setOrderModalData,
+  openModal
+} from '../../slices/burgerSlice';
 
-const maxIngredients = 6;
+const maxIngredients = 5;
 
 export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
   const location = useLocation();
-
-  /** TODO: взять переменную из стора */
-  const ingredients: TIngredient[] = [];
+  const dispatch = useDispatch();
+  const ingredients = useSelector(selectBurgerIngredients);
+  const newOrderId = useSelector(selectNewOrderId);
 
   const orderInfo = useMemo(() => {
-    if (!ingredients.length) return null;
+    if (!ingredients.length) {
+      return null;
+    }
 
     const ingredientsInfo = order.ingredients.reduce(
       (acc: TIngredient[], item: string) => {
@@ -25,16 +33,19 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
       []
     );
 
+    if (!ingredientsInfo.length) {
+      return null;
+    }
+
     const total = ingredientsInfo.reduce((acc, item) => acc + item.price, 0);
-
     const ingredientsToShow = ingredientsInfo.slice(0, maxIngredients);
-
     const remains =
       ingredientsInfo.length > maxIngredients
         ? ingredientsInfo.length - maxIngredients
         : 0;
 
     const date = new Date(order.createdAt);
+
     return {
       ...order,
       ingredientsInfo,
@@ -47,11 +58,18 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
 
   if (!orderInfo) return null;
 
+  const handleOrderClick = () => {
+    dispatch(setOrderModalData(order));
+    dispatch(openModal());
+  };
+
   return (
     <OrderCardUI
       orderInfo={orderInfo}
       maxIngredients={maxIngredients}
       locationState={{ background: location }}
+      onClick={handleOrderClick}
+      isNew={newOrderId === order._id}
     />
   );
 });

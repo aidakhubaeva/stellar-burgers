@@ -14,9 +14,11 @@ export type TIngredient = {
 
 export type TConstructorIngredient = TIngredient & {
   id: string;
+  uniqueId?: string;
 };
 
 export type TOrder = {
+  user: any;
   _id: string;
   status: string;
   name: string;
@@ -38,3 +40,14 @@ export type TUser = {
 };
 
 export type TTabMode = 'bun' | 'sauce' | 'main';
+
+export type TLoginData = {
+  email: string;
+  password: string;
+};
+
+export type TRegisterData = {
+  email: string;
+  name: string;
+  password: string;
+};

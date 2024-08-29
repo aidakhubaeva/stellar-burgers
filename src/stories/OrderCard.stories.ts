@@ -81,6 +81,7 @@ export const DefaultOrderCard: Story = {
         search: '',
         state: null
       }
-    }
+    },
+    isNew: false // Добавляем свойство isNew
   }
 };

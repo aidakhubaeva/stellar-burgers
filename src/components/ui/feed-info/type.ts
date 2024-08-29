@@ -2,6 +2,8 @@ export type FeedInfoUIProps = {
   feed: any;
   readyOrders: number[];
   pendingOrders: number[];
+  onLoadMore?: () => void;
+  // totalOrdersCount: number | null;
 };
 
 export type HalfColumnProps = {

@@ -1,97 +1,113 @@
 /// <reference types="cypress" />
 
 describe('Проверка добавления ингредиентов', () => {
-    beforeEach(() => {
-        // Перехват запроса на получение ингредиентов и подмена его фикстурой
-        cy.intercept('GET', '/api/ingredients', { fixture: 'ingredients.json' }).as('getIngredients');
+    const ingredientSelector = '[data-cy="ingredient"]'; // Константа для селектора ингредиентов
+    const ingredientModalSelector = '[data-cy="ingredient-modal"]'; // Константа для селектора модального окна ингредиента
 
-        // Перехват запроса на получение данных пользователя и подмена его фикстурой
+    beforeEach(() => {
+        cy.intercept('GET', '/api/ingredients', { fixture: 'ingredients.json' }).as('getIngredients');
         cy.intercept('GET', '/api/auth/user', { fixture: 'user.json' }).as('getUser');
 
-        // Установка токена аутентификации в localStorage перед загрузкой страницы
+        // Установите токен аутентификации в localStorage перед загрузкой страницы
         window.localStorage.setItem('refreshToken', 'testRefreshToken');
         cy.setCookie('accessToken', 'testAccessToken');
 
-        // Открытие главной страницы
-        cy.visit('/');
+        cy.visit('/'); // Открытие страницы
 
-        // Ожидание загрузки данных с сервера
+        // Ожидание загрузки данных
         cy.wait('@getIngredients');
         cy.wait('@getUser');
     });
 
     it('сервис должен быть доступен по адресу localhost:4000', () => {
-        // Проверка, что URL страницы соответствует ожидаемому
-        cy.url().should('eq', 'http://localhost:4000/');
+        cy.url().should('eq', 'http://localhost:4000/'); // Проверка, что URL правильный
     });
 
     it('есть возможность добавлять ингредиенты', () => {
-        // Проверка наличия начальных текстов перед добавлением ингредиентов
+        // Проверяем наличие начальных текстов перед добавлением ингредиентов
         cy.contains('Выберите булки').should('be.visible');
         cy.contains('Выберите начинку').should('be.visible');
 
-        // Использование команды для добавления первой булки
-        cy.addFirstBun();
-        // Проверка, что текст "Выберите булки" исчез после добавления булки
+        // Кликаем по кнопке "Добавить" в первом ингредиенте типа "bun"
+        cy.get('[data-type="bun"]').first().within(() => {
+            cy.get('button').contains('Добавить').click();
+        });
+
+        // Убедиться, что текст "Выберите булки" больше не существует
         cy.contains('Выберите булки').should('not.exist');
 
-        // Использование команды для добавления первого основного ингредиента
-        cy.addFirstMainIngredient();
-        // Проверка, что текст "Выберите начинку" исчез после добавления начинки
+        // Кликаем по кнопке "Добавить" в первом ингредиенте типа "main"
+        cy.get('[data-type="main"]').first().within(() => {
+            cy.get('button').contains('Добавить').click();
+        });
+
+        // Убедиться, что текст "Выберите начинку" больше не существует
         cy.contains('Выберите начинку').should('not.exist');
     });
 
     it('открытие модального окна ингредиента', () => {
-        // Открытие модального окна ингредиента
-        cy.openIngredientModal();
-        // Проверка, что модальное окно открыто
-        cy.get('[data-cy="ingredient-modal"]').should('be.visible');
+        // Находим первый ингредиент и создаем alias
+        cy.get(ingredientSelector).first().as('firstIngredient');
+        cy.get('@firstIngredient').click();
+
+        cy.get(ingredientModalSelector).as('ingredientModal'); // Создаем alias для модального окна
+        cy.get('@ingredientModal').should('be.visible');
     });
 
     it('закрытие по иконке модального окна ингредиента', () => {
-        // Открытие модального окна ингредиента
-        cy.openIngredientModal();
-        cy.get('[data-cy="ingredient-modal"]').should('be.visible');
+        cy.get(ingredientSelector).first().as('firstIngredient'); // Создаем alias
+        cy.get('@firstIngredient').click();
 
-        // Закрытие модального окна по иконке
-        cy.closeModal();
-        // Проверка, что модальное окно закрыто
-        cy.get('[data-cy="ingredient-modal"]').should('not.exist');
+        cy.get(ingredientModalSelector).as('ingredientModal'); // Создаем alias
+        cy.get('@ingredientModal').should('be.visible');
+
+        // Закрываем модальное окно по иконке закрытия
+        cy.get('[data-cy="modal-close"]').click();
+        cy.get('@ingredientModal').should('not.exist');
     });
 
     it('закрытие по оверлею модального окна ингредиента', () => {
-        // Открытие модального окна ингредиента
-        cy.openIngredientModal();
-        cy.get('[data-cy="ingredient-modal"]').should('be.visible');
+        cy.get(ingredientSelector).first().as('firstIngredient'); // Создаем alias
+        cy.get('@firstIngredient').click();
 
-        // Закрытие модального окна по оверлею
-        cy.closeOverlayModal();
-        // Проверка, что модальное окно закрыто
-        cy.get('[data-cy="ingredient-modal"]').should('not.exist');
+        cy.get(ingredientModalSelector).as('ingredientModal'); // Создаем alias
+        cy.get('@ingredientModal').should('be.visible');
+
+        cy.get('[data-cy="modal-close-overlay"]').click({ force: true });
+        cy.get('@ingredientModal').should('not.exist');
     });
 
     it('есть возможность добавлять ингредиенты и успешно создавать заказ', () => {
-        // Добавление ингредиентов в конструктор
-        cy.addFirstBun();
-        cy.addFirstMainIngredient();
+        // Добавление ингредиентов
+        cy.get(`${ingredientSelector}[data-type="bun"]`).first().as('firstBun'); // Создаем alias
+        cy.get('@firstBun').within(() => {
+            cy.get('button').contains('Добавить').click();
+        });
+
+        cy.get(`${ingredientSelector}[data-type="main"]`).first().as('firstMainIngredient'); // Создаем alias
+        cy.get('@firstMainIngredient').within(() => {
+            cy.get('button').contains('Добавить').click();
+        });
+
+        // Убедиться, что текст "Выберите начинку" больше не существует
         cy.contains('Выберите начинку').should('not.exist');
 
-        // Перехват запроса на создание заказа и подмена его фикстурой
+        // Мокаем запрос на создание заказа
         cy.intercept('POST', '/api/orders', { fixture: 'createOrder.json' }).as('createOrder');
+
         // Отправка заказа
         cy.get('[data-cy="submit-order"]').click();
 
-        // Ожидание завершения запроса на создание заказа
-        cy.wait('@createOrder');
         // Проверка, что открылось модальное окно с номером заказа
+        cy.wait('@createOrder');
         cy.get('[data-cy="order-modal"]').should('be.visible');
         cy.get('[data-cy="new-order-number"]').should('be.visible');
 
         // Закрытие модального окна
-        cy.closeModal();
-
-        // Проверка, что модальное окно закрыто и конструктор пуст
+        cy.get('[data-cy="modal-close"]').click();
         cy.get('[data-cy="order-modal"]').should('not.exist');
+
+        // Проверка, что конструктор пуст
         cy.get('[data-cy="constructor-bun"]').should('not.exist');
         cy.get('[data-cy="constructor-main"]').should('not.exist');
         cy.contains('Выберите булки').should('be.visible');

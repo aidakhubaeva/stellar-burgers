@@ -16,7 +16,9 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   price,
   orderModalData,
   onOrderClick,
-  closeOrderModal
+  closeOrderModal,
+  handleRemove,
+  handleMove
 }) => (
   <section className={styles.burger_constructor}>
     {constructorItems.bun ? (
@@ -32,6 +34,7 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
     ) : (
       <div
         className={`${styles.noBuns} ${styles.noBunsTop} ml-8 mb-4 mr-5 text text_type_main-default`}
+        data-cy='no_bun_text_1'
       >
         Выберите булки
       </div>
@@ -44,7 +47,12 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
               ingredient={item}
               index={index}
               totalItems={constructorItems.ingredients.length}
-              key={item.id}
+              key={item.uniqueId!}
+              handleRemove={handleRemove}
+              handleMoveUp={() => handleMove(index, index - 1)}
+              handleMoveDown={() => handleMove(index, index + 1)}
+              handleClose={() => handleRemove(item.uniqueId!)}
+              onMove={handleMove}
             />
           )
         )
@@ -83,6 +91,7 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         type='primary'
         size='large'
         children='Оформить заказ'
+        data-cy='submit-order'
         onClick={onOrderClick}
       />
     </div>

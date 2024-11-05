@@ -1,33 +1,24 @@
+import React, { FC } from 'react';
 import { useSelector } from '../../services/store';
-
-import styles from './constructor-page.module.css';
-
-import { BurgerIngredients } from '../../components';
-import { BurgerConstructor } from '../../components';
-import { Preloader } from '../../components/ui';
-import { FC } from 'react';
+import {
+  selectBurgerIngredients,
+  selectBurgerStatus,
+  selectBurgerError
+} from '../../slices/burgerSlice';
+import { ConstructorPageUI } from '../../components/ui/pages/constructor-page';
 
 export const ConstructorPage: FC = () => {
-  /** TODO: взять переменную из стора */
-  const isIngredientsLoading = false;
+  const ingredients = useSelector(selectBurgerIngredients);
+  const status = useSelector(selectBurgerStatus);
+  const error = useSelector(selectBurgerError);
+
+  const isIngredientsLoading = status === 'loading';
 
   return (
-    <>
-      {isIngredientsLoading ? (
-        <Preloader />
-      ) : (
-        <main className={styles.containerMain}>
-          <h1
-            className={`${styles.title} text text_type_main-large mt-10 mb-5 pl-5`}
-          >
-            Соберите бургер
-          </h1>
-          <div className={`${styles.main} pl-5 pr-5`}>
-            <BurgerIngredients />
-            <BurgerConstructor />
-          </div>
-        </main>
-      )}
-    </>
+    <ConstructorPageUI
+      isIngredientsLoading={isIngredientsLoading}
+      ingredients={ingredients}
+      error={error}
+    />
   );
 };

@@ -12,6 +12,9 @@
   border-radius: 40px;
   min-width: 576px;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  transition: box-shadow 0.5s ease-in-out;
 }
 
 .order_info {
@@ -32,6 +35,16 @@
 
 .order_total {
   vertical-align: top;
+}
+
+.order_new {
+  box-shadow:
+    0px 0px 8px 1px rgba(51, 51, 255, 0.25),
+    0px 0px 8px 1px rgba(51, 51, 255, 0.25),
+    0px 0px 2px 0px rgba(85, 85, 255, 0.822);
+  filter: drop-shadow(0px 1px 5px rgba(51, 51, 255, 0.5));
+  z-index: 0;
+  transition: box-shadow 0.5s ease-in-out;
 }
 
 .img_wrap {

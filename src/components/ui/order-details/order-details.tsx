@@ -7,10 +7,15 @@ export const OrderDetailsUI: React.FC<OrderDetailsUIProps> = ({
   orderNumber
 }) => (
   <>
-    <h2 className={`${styles.title} text text_type_digits-large mt-2 mb-4`}>
+    <h2
+      className={`${styles.title} text text_type_digits-large mt-2 mb-4`}
+      data-cy='order-modal'
+    >
       {orderNumber}
     </h2>
-    <p className='text text_type_main-medium'>идентификатор заказа</p>
+    <p className='text text_type_main-medium' data-cy='new-order-number'>
+      идентификатор заказа
+    </p>
     <img
       className={styles.img}
       src={doneImg}

@@ -2,7 +2,6 @@
 
 **"Stellar Burgers"** is a cosmic burger builder where you can create your own "out-of-this-world" burger.
 
-
 [Макет](<https://www.figma.com/file/vIywAvqfkOIRWGOkfOnReY/React-Fullstack_-Проектные-задачи-(3-месяца)_external_link?type=design&node-id=0-1&mode=design>)
 
 ![Stellar Burgers](https://drive.google.com/uc?export=view&id=1qiRng4JMiPNuOtI2a152olQgftKUYDdA)
